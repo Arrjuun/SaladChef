@@ -3,18 +3,11 @@ Salad Chef simulation in Unity
 
 ![Initial Layout Design](/Images/LayoutDesign.JPG)
 
-Player 1 Controls
-w - MoveUp
-a - MoveLeft
-s - MoveDown
-d - MoveRight
-q - PickUp
-e - Drop
-
-Player 1 Controls
-up arrow - MoveUp
-left arrow - MoveLeft
-down arrow - MoveDown
-right arrow - MoveRight
-/ - PickUp
-numpad enter - Drop
+Function	|Player1|Player2
+------------|-------|-------
+MoveUp		|w		|up
+MoveLeft	|a		|left
+MoveDown	|s		|down
+MoveRight	|d		|right
+PickUp		|q		|/
+Drop		|e		|numpad enter
