@@ -64,7 +64,6 @@ public class Customer : MonoBehaviour
     {
         if(!areVegetablesSame(processedSalad))
         {
-            Debug.Log("Got wrong Delivery");
             GetAngry(player);
             //NoteWrongDelivery(player);
         }
@@ -80,7 +79,6 @@ public class Customer : MonoBehaviour
                 AwardPlayer(player, false);
             }
             RemoveCustomer();
-            Debug.Log("Received correct Salad");
         }
     }
 
@@ -124,6 +122,10 @@ public class Customer : MonoBehaviour
 
     void Update()
     {
+        if(Constants.GameOver)
+        {
+            Destroy(this.gameObject);
+        }
         if(TimeLeft <= 0)
         {
             Punish();
@@ -151,16 +153,15 @@ public class Customer : MonoBehaviour
             {
                 foreach(PlayerMovement player in WrongedPlayers)
                 {
-                    player.ChangeScore(-1f * AwardPoints);
+                    player.ChangeScore(-1 * AwardPoints);
                 }
             }
-            else
-            {
-                gameManager.Player1.ChangeScore(-0.5f * AwardPoints);
-                gameManager.Player2.ChangeScore(-0.5f * AwardPoints);
-            }
         }
-        Debug.Log("Punish users");
+        else
+        {
+            gameManager.Player1.ChangeScore(AwardPoints / -2);
+            gameManager.Player2.ChangeScore(AwardPoints / -2);
+        }
     }
 
     void RemoveCustomer()

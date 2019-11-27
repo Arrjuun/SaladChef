@@ -50,4 +50,15 @@ public class ChoppingBoard : MonoBehaviour
         return temp;
     }
 
+    void Update()
+    {
+        if (Constants.GameOver)
+        {
+            saladInventory = new List<int>();
+            foreach (Transform veggies in SaladHolder)
+            {
+                Destroy(veggies.gameObject);
+            }
+        }
+    }
 }

@@ -62,4 +62,15 @@ public class Plate : MonoBehaviour
             return false;
         }
     }
+
+    void Update()
+    {
+        if(Constants.GameOver)
+        {
+            foreach(Transform veggies in VegetableHolder)
+            {
+                Destroy(veggies.gameObject);
+            }
+        }
+    }
 }

@@ -46,7 +46,7 @@ public class PlayerMovement : MonoBehaviour
     /// <summary>
     /// Player Score
     /// </summary>
-    float score = 0;
+    public int score = 0;
 
     /// <summary>
     /// List to hold the salad
@@ -79,75 +79,121 @@ public class PlayerMovement : MonoBehaviour
     /// </summary>
     public GameObject SaladInventoryPrefab;
 
+    /// <summary>
+    /// Reference to the player's chopping board
+    /// </summary>
     public ChoppingBoard choppingBoard;
 
+    /// <summary>
+    /// Reference to Player's plate
+    /// </summary>
     public Plate plate;
 
+    /// <summary>
+    /// Reference to all vegetable sprites
+    /// </summary>
     public Sprite[] VegetableSprites;
 
+    /// <summary>
+    /// Indicator to see if the player is near Player's Chopping Board
+    /// </summary>
     public bool NearChoppingBoard;
 
+    /// <summary>
+    /// Indicator to see if the player is near Player's Plate
+    /// </summary>
     public bool NearPlate;
 
+    /// <summary>
+    /// Indicator to see if the player is near a Customer
+    /// </summary>
     public bool NearCustomer;
 
+    /// <summary>
+    /// Indicator to see if the player is chopping
+    /// </summary>
     public bool isChopping;
 
+    /// <summary>
+    /// Reference to the Customer if the Player is near a customer
+    /// </summary>
     public Customer customer;
 
+    /// <summary>
+    /// Reference to player's UI Tile left text
+    /// </summary>
     public Text TimeLeftText;
 
+    /// <summary>
+    /// Reference to player's Score text
+    /// </summary>
     public Text ScoreText;
 
+    /// <summary>
+    /// Time left for the Player
+    /// </summary>
     public float TimeLeft;
+
+    float time;
+    Vector3 initialTransform;
+
+    void Awake()
+    {
+        time = TimeLeft;
+        initialTransform = this.transform.position;
+    }
 
     void Update()
     {
-        if(TimeLeft >= 0)
+        if(!Constants.GameOver)
         {
-            if (!isChopping)
+            if (TimeLeft >= 0)
             {
-                if (Input.GetButtonDown(PickUpKey))
+                if (!isChopping)
                 {
-                    if (NearVegetableIndex >= 0 && NearVegetableIndex <= 5)
+                    if (Input.GetButtonDown(PickUpKey))
                     {
-                        AddVegetable(NearVegetableIndex);
+                        if (NearVegetableIndex >= 0 && NearVegetableIndex <= 5)
+                        {
+                            AddVegetable(NearVegetableIndex);
+                        }
+                        if (NearChoppingBoard)
+                        {
+                            PickSalad();
+                        }
+                        if (NearPlate)
+                        {
+                            TakeFromPlate();
+                        }
                     }
-                    if (NearChoppingBoard)
+                    if (Input.GetButtonDown(DropKey))
                     {
-                        PickSalad();
+                        if (NearTrashCan)
+                        {
+                            FlushVegetableInventory();
+                        }
+                        if (NearChoppingBoard && vegetableInventory.Count > 0)
+                        {
+                            StartCoroutine(ChopVegetables(Constants.TimeToChop[vegetableInventory[0]]));
+                        }
+                        if (NearPlate && vegetableInventory.Count > 0)
+                        {
+                            AddToPlate();
+                        }
+                        if (NearCustomer && ProcessedSaladInventory.Count > 0)
+                        {
+                            customer.ReceiveSalad(this, ProcessedSaladInventory);
+                            FlushVegetableInventory();
+                        }
                     }
-                    if (NearPlate)
-                    {
-                        TakeFromPlate();
-                    }
+                    Move();
+                    TimeLeft -= Time.deltaTime;
+                    TimeLeftText.text = Mathf.Ceil(TimeLeft).ToString() + " s";
                 }
-                if (Input.GetButtonDown(DropKey))
-                {
-                    if (NearTrashCan)
-                    {
-                        FlushVegetableInventory();
-                    }
-                    if (NearChoppingBoard && vegetableInventory.Count > 0)
-                    {
-                        StartCoroutine(ChopVegetables(Constants.TimeToChop[vegetableInventory[0]]));
-                    }
-                    if (NearPlate && vegetableInventory.Count > 0)
-                    {
-                        AddToPlate();
-                    }
-                    if (NearCustomer && ProcessedSaladInventory.Count > 0)
-                    {
-                        customer.ReceiveSalad(this, ProcessedSaladInventory);
-                        FlushVegetableInventory();
-                    }
-                }
-                Move();
-                TimeLeft -= Time.deltaTime;
-                TimeLeftText.text = Mathf.Ceil(TimeLeft).ToString() + " s";
+
             }
-        
         }
+        
     }
 
     void Move()
@@ -231,9 +277,46 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    public void ChangeScore(float additionalScore)
+    public void ChangeScore(int additionalScore)
     {
         score += additionalScore;
         ScoreText.text = score.ToString();
+    }
+
+    public IEnumerator SpeedPowerUp(int TimeForSpeed)
+    {
+        Speed *= 4;
+        yield return new WaitForSeconds(TimeForSpeed);
+        Speed /= 4;
+    }
+
+    public void PowerUpAddPoints(int PointsToAdd)
+    {
+        score += PointsToAdd;
+        ScoreText.text = score.ToString();
+    }
+
+    public void PowerUpAddTime(int TimeToAdd)
+    {
+        TimeLeft += TimeToAdd;
+        TimeLeftText.text = TimeLeft.ToString();
+    }
+
+    public void ResetPlayer()
+    {
+        TimeLeft = time;
+        this.transform.position = initialTransform;
+
+        vegetableInventory = new List<int>();
+        ProcessedSaladInventory = new List<int>();
+        score = 0;
+        foreach (Transform veggies in VegetablesInventoryHolder)
+        {
+            Destroy(veggies.gameObject);
+        }
+        foreach (Transform veggies in SaladInventoryHolder)
+        {
+            Destroy(veggies.gameObject);
+        }
     }
 }
